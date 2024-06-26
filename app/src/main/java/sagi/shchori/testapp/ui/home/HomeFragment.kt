@@ -16,6 +16,7 @@ class HomeFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    private lateinit var adapter: Adapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,10 +29,28 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textHome
+
+
+        val textView: TextView = binding.textView
         homeViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
+
+        adapter = Adapter()
+
+        binding.recyclerView
+
+        homeViewModel.itemsList.observe(viewLifecycleOwner) {
+            if (it.size > 0) {
+                adapter.updateData(it)
+                binding.textView.visibility = View.GONE
+                binding.recyclerView.visibility = View.VISIBLE
+            } else {
+                binding.recyclerView.visibility = View.INVISIBLE
+                binding.textView.visibility = View.VISIBLE
+            }
+        }
+
         return root
     }
 
