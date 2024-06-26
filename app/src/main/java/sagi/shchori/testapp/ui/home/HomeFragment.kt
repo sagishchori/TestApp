@@ -6,9 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import dagger.hilt.android.AndroidEntryPoint
+import sagi.shchori.testapp.Result
 import sagi.shchori.testapp.databinding.FragmentHomeBinding
+import sagi.shchori.testapp.ui.UiState
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
@@ -16,38 +23,56 @@ class HomeFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-    private lateinit var adapter: Adapter
+    @Inject private lateinit var adapter: Adapter
+
+    private val homeViewModel: HomeViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
-
-
 
         val textView: TextView = binding.textView
         homeViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
 
-        adapter = Adapter()
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext()).apply {
+                orientation = LinearLayoutManager.VERTICAL
+            }
 
-        binding.recyclerView
+            adapter = this@HomeFragment.adapter
+        }
+
 
         homeViewModel.itemsList.observe(viewLifecycleOwner) {
-            if (it.size > 0) {
+            if (it.isNotEmpty()) {
                 adapter.updateData(it)
-                binding.textView.visibility = View.GONE
-                binding.recyclerView.visibility = View.VISIBLE
-            } else {
-                binding.recyclerView.visibility = View.INVISIBLE
-                binding.textView.visibility = View.VISIBLE
+            }
+        }
+
+        homeViewModel.uiState.observe(viewLifecycleOwner) {
+            when(it) {
+                UiState.LOADING -> {
+                    binding.progressBar.visibility = View.VISIBLE
+                }
+
+                UiState.SUCCESS -> {
+                    binding.progressBar.visibility = View.GONE
+                    binding.textView.visibility = View.GONE
+                    binding.recyclerView.visibility = View.VISIBLE
+                }
+
+                UiState.FAILURE -> {
+                    binding.progressBar.visibility = View.GONE
+                    binding.recyclerView.visibility = View.INVISIBLE
+                    binding.textView.visibility = View.VISIBLE
+                }
             }
         }
 

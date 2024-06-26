@@ -57,11 +57,17 @@ dependencies {
     implementation("io.coil-kt:coil:2.6.0")
 
     val roomVersion = "2.6.1"
-
     implementation("androidx.room:room-runtime:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
 
     implementation("com.google.dagger:hilt-android:2.48")
     kapt("com.google.dagger:hilt-android-compiler:2.48")
+
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // Log API calls
+    implementation("com.squareup.okhttp3:logging-interceptor:4.7.2")
 }

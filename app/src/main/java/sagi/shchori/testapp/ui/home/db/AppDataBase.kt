@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import sagi.shchori.testapp.ui.home.model.ModelClass
 
-@Database(entities = [::class], version = 1)
+@Database(entities = [ModelClass::class], version = 1)
 abstract class AppDataBase : RoomDatabase() {
+
+    abstract fun appDao(): AppDao
 
     companion object {
 

@@ -1,16 +1,19 @@
 package sagi.shchori.testapp.ui.home.db
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import sagi.shchori.testapp.ui.home.model.ModelClass
 
 @Dao
-interface LocationDataDao {
+interface AppDao {
 
     @Query("SELECT * FROM modelTable")
-    fun getAllLocations(): List<ModelClass>
+    suspend fun getAllItems(): Flow<List<ModelClass>>
+
+    @Insert
+    suspend fun insertAll(items: List<ModelClass>)
 
     @Query("SELECT * FROM modelTable WHERE someField == :someField")
     fun getLocationData(someField: Int): List<ModelClass>

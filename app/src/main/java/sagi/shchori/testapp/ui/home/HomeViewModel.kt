@@ -4,8 +4,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import sagi.shchori.testapp.Result
+import sagi.shchori.testapp.ui.UiState
+import sagi.shchori.testapp.ui.home.model.ModelClass
+import javax.inject.Inject
 
-class HomeViewModel(private val repository: Repository) : ViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor(private val repository: Repository) : ViewModel() {
 
     init {
         loadData()
@@ -31,13 +41,33 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
     }
     val text: LiveData<String> = _text
 
-    private val _itemsList = MutableLiveData<ArrayList<String>>().apply {
+    private val _itemsList = MutableLiveData<List<ModelClass>>().apply {
         value = arrayListOf()
     }
+    val itemsList: LiveData<List<ModelClass>> = _itemsList
 
-    val itemsList: LiveData<ArrayList<String>> = _itemsList
+    private val _uiState = MutableLiveData<UiState>()
+    val uiState: LiveData<UiState> = _uiState
 
     private fun loadData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.postValue(UiState.LOADING)
 
+            repository.getData().collect {  result ->
+
+                // Failure
+                if (result.isEmpty()) {
+                    _itemsList.postValue(emptyList())
+
+                    _uiState.postValue(UiState.FAILURE)
+                }
+                // Success
+                else {
+                    _itemsList.postValue(result)
+
+                    _uiState.postValue(UiState.SUCCESS)
+                }
+            }
+        }
     }
 }
