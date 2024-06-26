@@ -1,6 +1,7 @@
 package sagi.shchori.testapp.ui.home
 
 import android.content.Context
+import androidx.lifecycle.asLiveData
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -25,7 +26,7 @@ class Repository @Inject constructor(@ActivityContext val context: Context) {
         val dataFromDB = appDao.getAllItems()
 
         // If items from DB is empty try to fetch data from network
-        if (dataFromDB == null) {
+        if (dataFromDB.asLiveData().value == null) {
 
             // Trying to fetch data from network
             val dataFromNetwork = getDataFromNetwork()
